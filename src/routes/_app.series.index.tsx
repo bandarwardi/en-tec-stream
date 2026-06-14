@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft, Star } from "lucide-react";
 import { seriesList } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/_app/series")({
+export const Route = createFileRoute("/_app/series/")({
   component: SeriesPage,
 });
 

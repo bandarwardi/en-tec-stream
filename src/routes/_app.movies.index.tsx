@@ -6,7 +6,7 @@ import { QualityBadge } from "@/components/badges";
 
 const FILTERS = ["All", "Action", "Drama", "Comedy", "Sci-Fi", "Thriller", "Adventure"];
 
-export const Route = createFileRoute("/_app/movies")({
+export const Route = createFileRoute("/_app/movies/")({
   component: MoviesPage,
 });
 
