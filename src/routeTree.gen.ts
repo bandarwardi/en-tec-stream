@@ -9,38 +9,174 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayerIdRouteImport } from './routes/player.$id'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppSeriesRouteImport } from './routes/_app.series'
+import { Route as AppPlaylistsRouteImport } from './routes/_app.playlists'
+import { Route as AppMoviesRouteImport } from './routes/_app.movies'
+import { Route as AppLiveRouteImport } from './routes/_app.live'
+import { Route as AppHomeRouteImport } from './routes/_app.home'
+import { Route as AppCatchupRouteImport } from './routes/_app.catchup'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayerIdRoute = PlayerIdRouteImport.update({
+  id: '/player/$id',
+  path: '/player/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSeriesRoute = AppSeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaylistsRoute = AppPlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMoviesRoute = AppMoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLiveRoute = AppLiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHomeRoute = AppHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCatchupRoute = AppCatchupRouteImport.update({
+  id: '/catchup',
+  path: '/catchup',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/catchup': typeof AppCatchupRoute
+  '/home': typeof AppHomeRoute
+  '/live': typeof AppLiveRoute
+  '/movies': typeof AppMoviesRoute
+  '/playlists': typeof AppPlaylistsRoute
+  '/series': typeof AppSeriesRoute
+  '/settings': typeof AppSettingsRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/catchup': typeof AppCatchupRoute
+  '/home': typeof AppHomeRoute
+  '/live': typeof AppLiveRoute
+  '/movies': typeof AppMoviesRoute
+  '/playlists': typeof AppPlaylistsRoute
+  '/series': typeof AppSeriesRoute
+  '/settings': typeof AppSettingsRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_app/catchup': typeof AppCatchupRoute
+  '/_app/home': typeof AppHomeRoute
+  '/_app/live': typeof AppLiveRoute
+  '/_app/movies': typeof AppMoviesRoute
+  '/_app/playlists': typeof AppPlaylistsRoute
+  '/_app/series': typeof AppSeriesRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/catchup'
+    | '/home'
+    | '/live'
+    | '/movies'
+    | '/playlists'
+    | '/series'
+    | '/settings'
+    | '/player/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/catchup'
+    | '/home'
+    | '/live'
+    | '/movies'
+    | '/playlists'
+    | '/series'
+    | '/settings'
+    | '/player/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/catchup'
+    | '/_app/home'
+    | '/_app/live'
+    | '/_app/movies'
+    | '/_app/playlists'
+    | '/_app/series'
+    | '/_app/settings'
+    | '/player/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  PlayerIdRoute: typeof PlayerIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +184,92 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/player/$id': {
+      id: '/player/$id'
+      path: '/player/$id'
+      fullPath: '/player/$id'
+      preLoaderRoute: typeof PlayerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/series': {
+      id: '/_app/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof AppSeriesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/playlists': {
+      id: '/_app/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof AppPlaylistsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/movies': {
+      id: '/_app/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof AppMoviesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/live': {
+      id: '/_app/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof AppLiveRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/home': {
+      id: '/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AppHomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/catchup': {
+      id: '/_app/catchup'
+      path: '/catchup'
+      fullPath: '/catchup'
+      preLoaderRoute: typeof AppCatchupRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCatchupRoute: typeof AppCatchupRoute
+  AppHomeRoute: typeof AppHomeRoute
+  AppLiveRoute: typeof AppLiveRoute
+  AppMoviesRoute: typeof AppMoviesRoute
+  AppPlaylistsRoute: typeof AppPlaylistsRoute
+  AppSeriesRoute: typeof AppSeriesRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCatchupRoute: AppCatchupRoute,
+  AppHomeRoute: AppHomeRoute,
+  AppLiveRoute: AppLiveRoute,
+  AppMoviesRoute: AppMoviesRoute,
+  AppPlaylistsRoute: AppPlaylistsRoute,
+  AppSeriesRoute: AppSeriesRoute,
+  AppSettingsRoute: AppSettingsRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  PlayerIdRoute: PlayerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
