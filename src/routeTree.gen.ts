@@ -20,6 +20,7 @@ import { Route as AppMoviesRouteImport } from './routes/_app.movies'
 import { Route as AppLiveRouteImport } from './routes/_app.live'
 import { Route as AppHomeRouteImport } from './routes/_app.home'
 import { Route as AppCatchupRouteImport } from './routes/_app.catchup'
+import { Route as AppSeriesIdRouteImport } from './routes/_app.series.$id'
 import { Route as AppMovieIdRouteImport } from './routes/_app.movie.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -76,6 +77,11 @@ const AppCatchupRoute = AppCatchupRouteImport.update({
   path: '/catchup',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSeriesIdRoute = AppSeriesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppSeriesRoute,
+} as any)
 const AppMovieIdRoute = AppMovieIdRouteImport.update({
   id: '/movie/$id',
   path: '/movie/$id',
@@ -90,10 +96,11 @@ export interface FileRoutesByFullPath {
   '/live': typeof AppLiveRoute
   '/movies': typeof AppMoviesRoute
   '/playlists': typeof AppPlaylistsRoute
-  '/series': typeof AppSeriesRoute
+  '/series': typeof AppSeriesRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/player/$id': typeof PlayerIdRoute
   '/movie/$id': typeof AppMovieIdRoute
+  '/series/$id': typeof AppSeriesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,10 +110,11 @@ export interface FileRoutesByTo {
   '/live': typeof AppLiveRoute
   '/movies': typeof AppMoviesRoute
   '/playlists': typeof AppPlaylistsRoute
-  '/series': typeof AppSeriesRoute
+  '/series': typeof AppSeriesRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/player/$id': typeof PlayerIdRoute
   '/movie/$id': typeof AppMovieIdRoute
+  '/series/$id': typeof AppSeriesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,10 +126,11 @@ export interface FileRoutesById {
   '/_app/live': typeof AppLiveRoute
   '/_app/movies': typeof AppMoviesRoute
   '/_app/playlists': typeof AppPlaylistsRoute
-  '/_app/series': typeof AppSeriesRoute
+  '/_app/series': typeof AppSeriesRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/player/$id': typeof PlayerIdRoute
   '/_app/movie/$id': typeof AppMovieIdRoute
+  '/_app/series/$id': typeof AppSeriesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/player/$id'
     | '/movie/$id'
+    | '/series/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/player/$id'
     | '/movie/$id'
+    | '/series/$id'
   id:
     | '__root__'
     | '/'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/player/$id'
     | '/_app/movie/$id'
+    | '/_app/series/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCatchupRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/series/$id': {
+      id: '/_app/series/$id'
+      path: '/$id'
+      fullPath: '/series/$id'
+      preLoaderRoute: typeof AppSeriesIdRouteImport
+      parentRoute: typeof AppSeriesRoute
+    }
     '/_app/movie/$id': {
       id: '/_app/movie/$id'
       path: '/movie/$id'
@@ -262,13 +281,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppSeriesRouteChildren {
+  AppSeriesIdRoute: typeof AppSeriesIdRoute
+}
+
+const AppSeriesRouteChildren: AppSeriesRouteChildren = {
+  AppSeriesIdRoute: AppSeriesIdRoute,
+}
+
+const AppSeriesRouteWithChildren = AppSeriesRoute._addFileChildren(
+  AppSeriesRouteChildren,
+)
+
 interface AppRouteChildren {
   AppCatchupRoute: typeof AppCatchupRoute
   AppHomeRoute: typeof AppHomeRoute
   AppLiveRoute: typeof AppLiveRoute
   AppMoviesRoute: typeof AppMoviesRoute
   AppPlaylistsRoute: typeof AppPlaylistsRoute
-  AppSeriesRoute: typeof AppSeriesRoute
+  AppSeriesRoute: typeof AppSeriesRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppMovieIdRoute: typeof AppMovieIdRoute
 }
@@ -279,7 +310,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLiveRoute: AppLiveRoute,
   AppMoviesRoute: AppMoviesRoute,
   AppPlaylistsRoute: AppPlaylistsRoute,
-  AppSeriesRoute: AppSeriesRoute,
+  AppSeriesRoute: AppSeriesRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppMovieIdRoute: AppMovieIdRoute,
 }
