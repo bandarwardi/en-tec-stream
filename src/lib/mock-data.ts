@@ -95,25 +95,43 @@ export const movies: Movie[] = movieTitles.map((title, i) => ({
   title,
   poster: POSTERS[i % POSTERS.length],
   backdrop: BACKDROPS[i % BACKDROPS.length],
-  rating: +(6.5 + Math.random() * 2.5).toFixed(1),
+  rating: +(6.5 + ((i * 31) % 25) / 10).toFixed(1),
   year: 2024 + (i % 3),
   duration: `${1 + (i % 3)}h ${(15 + i * 7) % 60}m`,
   quality: (["4K", "FHD", "HD"] as const)[i % 3],
   genres: [["Action", "Thriller"], ["Drama", "Sci-Fi"], ["Comedy", "Adventure"]][i % 3],
   description: "An epic journey of justice, betrayal, and redemption. In a world where the divine spirit of righteousness fades, a lawyer rises to confront oppression and restore what was broken.",
   cast: Array.from({ length: 6 }, (_, j) => ({
-    name: ["Suriya", "Trisha", "RJ Balaji", "Indrans", "Anagha Maya", "Swasika"][j],
+    name: ["Suriya", "Trisha Krishnan", "RJ Balaji", "Indrans", "Anagha Maya Ravi", "Swasika"][j],
     avatar: AVATARS[j % AVATARS.length],
   })),
 }));
 
-export const seriesList: Series[] = Array.from({ length: 10 }, (_, i) => ({
+export type SeriesEpisode = { id: string; number: number; title: string; duration: string; thumbnail: string };
+export type SeriesFull = Series & {
+  backdrop: string;
+  year: number;
+  description: string;
+  episodes: SeriesEpisode[];
+};
+
+export const seriesList: SeriesFull[] = Array.from({ length: 10 }, (_, i) => ({
   id: `s${i + 1}`,
-  title: ["Friends", "Breaking Bad", "Stranger Things", "Wednesday", "The Crown", "Squid Game", "Money Heist", "Dark", "Peaky Blinders", "Succession"][i],
+  title: ["Amazing Interiors", "Breaking Bad", "Stranger Things", "Wednesday", "The Crown", "Squid Game", "Money Heist", "Dark", "Peaky Blinders", "Succession"][i],
   poster: POSTERS[(i + 2) % POSTERS.length],
-  rating: +(7 + Math.random() * 2.5).toFixed(1),
+  backdrop: BACKDROPS[(i + 1) % BACKDROPS.length],
+  rating: +(7 + ((i * 17) % 25) / 10).toFixed(1),
   seasons: 1 + (i % 6),
-  genres: [["Drama"], ["Thriller", "Mystery"], ["Comedy"]][i % 3],
+  year: 2018 + (i % 7),
+  genres: [["Talk", "Documentary", "Reality"], ["Thriller", "Mystery"], ["Drama"]][i % 3],
+  description: "Meet eccentric homeowners whose seemingly ordinary spaces are full of surprises, from a backyard roller coaster to an indoor aquarium.",
+  episodes: Array.from({ length: 6 }, (_, j) => ({
+    id: `s${i + 1}e${j + 1}`,
+    number: j + 1,
+    title: `Episode ${j + 1}`,
+    duration: `0h ${25 + ((j * 7) % 10)}m ${(j * 11) % 60}s`,
+    thumbnail: BACKDROPS[(i + j) % BACKDROPS.length],
+  })),
 }));
 
 export const featuredHero = [

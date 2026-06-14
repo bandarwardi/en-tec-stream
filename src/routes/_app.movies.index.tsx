@@ -6,7 +6,7 @@ import { QualityBadge } from "@/components/badges";
 
 const FILTERS = ["All", "Action", "Drama", "Comedy", "Sci-Fi", "Thriller", "Adventure"];
 
-export const Route = createFileRoute("/_app/movies")({
+export const Route = createFileRoute("/_app/movies/")({
   component: MoviesPage,
 });
 
@@ -51,7 +51,7 @@ function MoviesPage() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {items.map((m) => (
-          <Link key={m.id} to="/player/$id" params={{ id: m.id }} className="group">
+          <Link key={m.id} to="/movie/$id" params={{ id: m.id }} className="group">
             <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border">
               <img src={m.poster} alt={m.title} className="h-full w-full object-cover transition group-hover:scale-105" />
               <div className="absolute top-2 right-2"><QualityBadge quality={m.quality} /></div>

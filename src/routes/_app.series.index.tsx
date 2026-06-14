@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft, Star } from "lucide-react";
 import { seriesList } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/_app/series")({
+export const Route = createFileRoute("/_app/series/")({
   component: SeriesPage,
 });
 
@@ -15,7 +15,7 @@ function SeriesPage() {
       </header>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {seriesList.map((s) => (
-          <Link key={s.id} to="/player/$id" params={{ id: s.id }} className="group">
+          <Link key={s.id} to="/series/$id" params={{ id: s.id }} className="group">
             <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border">
               <img src={s.poster} alt={s.title} className="h-full w-full object-cover transition group-hover:scale-105" />
               <div className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded bg-background/70 backdrop-blur px-1.5 py-0.5 text-[10px] font-bold">

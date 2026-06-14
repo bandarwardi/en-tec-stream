@@ -13,7 +13,7 @@ const tabs = [
 export function BottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] lg:hidden">
       <ul className="mx-auto flex max-w-3xl items-stretch justify-around px-2">
         {tabs.slice(0, 5).map((t) => {
           const active = path.startsWith(t.to);
