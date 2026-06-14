@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Tv, Film, Folder, History, Settings, Search, RefreshCw, User, LogOut, PlayCircle } from "lucide-react";
+import { Home, Tv, Film, Folder, Settings, Search, RefreshCw, User, LogOut, PlayCircle } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 const top = [
