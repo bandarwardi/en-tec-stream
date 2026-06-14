@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronLeft, Star, Clock, Play, Heart, Mask as MaskIcon } from "lucide-react";
+import { ChevronLeft, Star, Clock, Play, Heart, Drama } from "lucide-react";
 import { movies } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_app/movie/$id")({
@@ -49,11 +49,13 @@ function MovieDetailPage() {
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-foreground/85">{movie.description}</p>
 
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 text-xs font-semibold backdrop-blur">
-            <MaskIcon className="h-4 w-4 text-primary" />
+            <Drama className="h-4 w-4 text-primary" />
             {movie.genres.join(", ")}
           </div>
 
-          <p className="mt-4 text-sm italic text-foreground/80">{movie.cast.map((c) => c.name).join(", ")}</p>
+          <p className="mt-4 text-sm italic text-foreground/80">
+            {movie.cast.map((c: { name: string }) => c.name).join(", ")}
+          </p>
 
           {/* CTAs */}
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 max-w-2xl">
@@ -74,7 +76,7 @@ function MovieDetailPage() {
       <section className="mt-10 px-5 pb-10">
         <h3 className="mb-4 text-lg font-bold">Cast:</h3>
         <div className="flex gap-5 overflow-x-auto scrollbar-hide -mx-5 px-5">
-          {movie.cast.concat(movie.cast).map((c, i) => (
+          {movie.cast.concat(movie.cast).map((c: { name: string; avatar: string }, i: number) => (
             <div key={i} className="shrink-0 w-24 text-center">
               <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border-2 border-border">
                 <img src={c.avatar} alt={c.name} className="h-full w-full object-cover" />
