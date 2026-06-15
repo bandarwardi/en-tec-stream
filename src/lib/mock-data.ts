@@ -59,30 +59,48 @@ const AVATARS = [
 
 export const categories = ["Sports", "News", "Movies", "Kids", "Arabic", "Music", "Documentaries", "Entertainment"];
 
-export const channels: Channel[] = [
-  { id: "c1", name: "FOX SPORTS 1", logo: "📺", category: "Sports", current: "FIFA World Cup Today", next: "FIFA World Cup 2026", quality: "4K", isLive: true },
-  { id: "c2", name: "BeIN Sports", logo: "⚽", category: "Sports", current: "Premier League Live", next: "Match Analysis", quality: "4K", isLive: true },
-  { id: "c3", name: "MBC 4K", logo: "🎬", category: "Arabic", current: "Top Chef Arabia", next: "Evening News", quality: "4K", isLive: true },
-  { id: "c4", name: "MBC ACTION", logo: "💥", category: "Movies", current: "Mission Impossible", next: "The Equalizer", quality: "FHD", isLive: true },
-  { id: "c5", name: "Al Jazeera", logo: "📰", category: "News", current: "Breaking News", next: "Inside Story", quality: "FHD", isLive: true },
-  { id: "c6", name: "CNN International", logo: "🌐", category: "News", current: "World News", next: "Amanpour", quality: "HD", isLive: true },
-  { id: "c7", name: "Cartoon Network", logo: "🎨", category: "Kids", current: "Ben 10", next: "Adventure Time", quality: "HD", isLive: true },
-  { id: "c8", name: "Disney Channel", logo: "🏰", category: "Kids", current: "Mickey Mouse", next: "Frozen Movie", quality: "FHD", isLive: true },
-  { id: "c9", name: "Rotana Cinema", logo: "🎭", category: "Arabic", current: "Karuppu (2026)", next: "Classic Film", quality: "4K", isLive: true },
-  { id: "c10", name: "National Geographic", logo: "🌍", category: "Documentaries", current: "Planet Earth", next: "Wild Africa", quality: "4K", isLive: true },
-  { id: "c11", name: "Discovery", logo: "🔬", category: "Documentaries", current: "Gold Rush", next: "Mythbusters", quality: "FHD", isLive: true },
-  { id: "c12", name: "MTV Live", logo: "🎵", category: "Music", current: "Top 40 Countdown", next: "Live Concert", quality: "HD", isLive: true },
-  { id: "c13", name: "MBC 1", logo: "📺", category: "Arabic", current: "Arab Idol", next: "Drama Night", quality: "FHD", isLive: true },
-  { id: "c14", name: "Sky Sports F1", logo: "🏎", category: "Sports", current: "Monaco GP", next: "Race Highlights", quality: "4K", isLive: true },
-  { id: "c15", name: "ESPN", logo: "🏀", category: "Sports", current: "NBA Finals", next: "SportsCenter", quality: "FHD", isLive: true },
-  { id: "c16", name: "HBO", logo: "🎬", category: "Movies", current: "House of Dragon", next: "Last of Us", quality: "4K", isLive: true },
-  { id: "c17", name: "Netflix Live", logo: "🅽", category: "Entertainment", current: "Stranger Things", next: "Wednesday", quality: "4K", isLive: true },
-  { id: "c18", name: "BBC News", logo: "🇬🇧", category: "News", current: "BBC World", next: "HARDtalk", quality: "HD", isLive: true },
-  { id: "c19", name: "Nickelodeon", logo: "🟧", category: "Kids", current: "SpongeBob", next: "Paw Patrol", quality: "HD", isLive: true },
-  { id: "c20", name: "Dubai TV", logo: "🇦🇪", category: "Arabic", current: "Morning Show", next: "News Hour", quality: "FHD", isLive: true },
-  { id: "c21", name: "MBC MAX", logo: "🎥", category: "Movies", current: "Inception", next: "Interstellar", quality: "4K", isLive: true },
-  { id: "c22", name: "Boomerang", logo: "🐰", category: "Kids", current: "Tom & Jerry", next: "Looney Tunes", quality: "HD", isLive: true },
+const CAT_COLORS: Record<string, string> = {
+  Sports: "0066FF",
+  News: "E50914",
+  Arabic: "C9A961",
+  Movies: "8B5CF6",
+  Kids: "F59E0B",
+  Music: "EC4899",
+  Documentaries: "10B981",
+  Entertainment: "DC2626",
+};
+
+function channelLogo(name: string, category: string) {
+  const bg = CAT_COLORS[category] ?? "1A1A1A";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=fff&bold=true&size=128&format=svg&font-size=0.42&length=3`;
+}
+
+const rawChannels: Omit<Channel, "logo">[] = [
+  { id: "c1", name: "FOX SPORTS 1", category: "Sports", current: "FIFA World Cup Today", next: "FIFA World Cup 2026", quality: "4K", isLive: true },
+  { id: "c2", name: "BeIN Sports", category: "Sports", current: "Premier League Live", next: "Match Analysis", quality: "4K", isLive: true },
+  { id: "c3", name: "MBC 4K", category: "Arabic", current: "Top Chef Arabia", next: "Evening News", quality: "4K", isLive: true },
+  { id: "c4", name: "MBC ACTION", category: "Movies", current: "Mission Impossible", next: "The Equalizer", quality: "FHD", isLive: true },
+  { id: "c5", name: "Al Jazeera", category: "News", current: "Breaking News", next: "Inside Story", quality: "FHD", isLive: true },
+  { id: "c6", name: "CNN International", category: "News", current: "World News", next: "Amanpour", quality: "HD", isLive: true },
+  { id: "c7", name: "Cartoon Network", category: "Kids", current: "Ben 10", next: "Adventure Time", quality: "HD", isLive: true },
+  { id: "c8", name: "Disney Channel", category: "Kids", current: "Mickey Mouse", next: "Frozen Movie", quality: "FHD", isLive: true },
+  { id: "c9", name: "Rotana Cinema", category: "Arabic", current: "Karuppu (2026)", next: "Classic Film", quality: "4K", isLive: true },
+  { id: "c10", name: "National Geographic", category: "Documentaries", current: "Planet Earth", next: "Wild Africa", quality: "4K", isLive: true },
+  { id: "c11", name: "Discovery", category: "Documentaries", current: "Gold Rush", next: "Mythbusters", quality: "FHD", isLive: true },
+  { id: "c12", name: "MTV Live", category: "Music", current: "Top 40 Countdown", next: "Live Concert", quality: "HD", isLive: true },
+  { id: "c13", name: "MBC 1", category: "Arabic", current: "Arab Idol", next: "Drama Night", quality: "FHD", isLive: true },
+  { id: "c14", name: "Sky Sports F1", category: "Sports", current: "Monaco GP", next: "Race Highlights", quality: "4K", isLive: true },
+  { id: "c15", name: "ESPN", category: "Sports", current: "NBA Finals", next: "SportsCenter", quality: "FHD", isLive: true },
+  { id: "c16", name: "HBO", category: "Movies", current: "House of Dragon", next: "Last of Us", quality: "4K", isLive: true },
+  { id: "c17", name: "Netflix Live", category: "Entertainment", current: "Stranger Things", next: "Wednesday", quality: "4K", isLive: true },
+  { id: "c18", name: "BBC News", category: "News", current: "BBC World", next: "HARDtalk", quality: "HD", isLive: true },
+  { id: "c19", name: "Nickelodeon", category: "Kids", current: "SpongeBob", next: "Paw Patrol", quality: "HD", isLive: true },
+  { id: "c20", name: "Dubai TV", category: "Arabic", current: "Morning Show", next: "News Hour", quality: "FHD", isLive: true },
+  { id: "c21", name: "MBC MAX", category: "Movies", current: "Inception", next: "Interstellar", quality: "4K", isLive: true },
+  { id: "c22", name: "Boomerang", category: "Kids", current: "Tom & Jerry", next: "Looney Tunes", quality: "HD", isLive: true },
 ];
+
+export const channels: Channel[] = rawChannels.map((c) => ({ ...c, logo: channelLogo(c.name, c.category) }));
 
 const movieTitles = [
   "Karuppu", "Mission Impossible", "The Equalizer", "Dune Part Two", "Oppenheimer",
