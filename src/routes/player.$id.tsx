@@ -13,6 +13,51 @@ export const Route = createFileRoute("/player/$id")({
 
 const DEMO_HLS_STREAM = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
+// A custom loader for Hls.js to route all requests (manifests and fragments) 
+// through a secure HTTPS proxy when the page is loaded over HTTPS to prevent Mixed Content blocking.
+class ProxyLoader {
+  private loader: any;
+
+  constructor(config: any) {
+    this.loader = new Hls.DefaultConfig.loader(config);
+  }
+
+  load(context: any, config: any, callbacks: any) {
+    const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
+    if (isHttpsPage && context.url && context.url.startsWith("http://")) {
+      const originalUrl = context.url;
+      // Prepend CORS proxy to bypass mixed content blocks
+      context.url = `https://corsproxy.io/?url=${encodeURIComponent(originalUrl)}`;
+      console.log(`[ProxyLoader] Prevents Mixed Content: Proxied insecure HLS request to HTTPS: ${originalUrl} -> ${context.url}`);
+    }
+    this.loader.load(context, config, callbacks);
+  }
+
+  abort() {
+    this.loader.abort();
+  }
+
+  destroy() {
+    this.loader.destroy();
+  }
+
+  get stats() {
+    return this.loader.stats;
+  }
+
+  get context() {
+    return this.loader.context;
+  }
+
+  getCacheAge() {
+    return this.loader.getCacheAge ? this.loader.getCacheAge() : null;
+  }
+
+  getResponseHeader(name: string) {
+    return this.loader.getResponseHeader ? this.loader.getResponseHeader(name) : null;
+  }
+}
+
 function Player() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
@@ -84,6 +129,13 @@ function Player() {
       streamUrl = streamUrl.replace(/\.ts$/, ".m3u8");
     }
 
+    // Rewrite stream URL via proxy if page is HTTPS to avoid mixed content block on manifest fetch
+    const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
+    if (isHttpsPage && streamUrl.startsWith("http://")) {
+      console.log(`[Player] HTTPS page detected, rewriting stream URL to HTTPS proxy: ${streamUrl}`);
+      streamUrl = `https://corsproxy.io/?url=${encodeURIComponent(streamUrl)}`;
+    }
+
     // Clean up previous Hls instance
     if (hlsRef.current) {
       hlsRef.current.destroy();
@@ -93,10 +145,11 @@ function Player() {
     // Event listener for native video error (mixed content / SSL cipher mismatch / native player error)
     const handleNativeVideoError = (e: Event) => {
       const currentSrc = video.src;
-      if (currentSrc && currentSrc.startsWith("https://")) {
-        const fallbackUrl = currentSrc.replace("https://", "http://");
-        console.warn(`[Player] Native error on HTTPS stream. Retrying with HTTP fallback: ${fallbackUrl}`);
-        toast.info("SSL Connection failed. Retrying with HTTP...");
+      if (currentSrc && currentSrc.startsWith("https://") && !currentSrc.includes("corsproxy.io")) {
+        const insecureUrl = currentSrc.replace("https://", "http://");
+        const fallbackUrl = `https://corsproxy.io/?url=${encodeURIComponent(insecureUrl)}`;
+        console.warn(`[Player] Native error on HTTPS stream. Retrying with HTTP proxy fallback: ${fallbackUrl}`);
+        toast.info("SSL Connection failed. Retrying through secure proxy...");
         video.src = fallbackUrl;
         video.load();
         video.play().catch(err => {
@@ -111,10 +164,14 @@ function Player() {
 
     video.addEventListener("error", handleNativeVideoError);
 
-    if (Hls.isSupported() && (streamUrl.includes(".m3u8") || streamUrl.includes(".ts") || isLive)) {
+    if (Hls.isSupported() && (streamUrl.includes(".m3u8") || streamUrl.includes(".ts") || isLive || streamUrl.includes("corsproxy.io"))) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
+        ...(isHttpsPage ? {
+          fLoader: ProxyLoader,
+          pLoader: ProxyLoader,
+        } : {}),
       });
       hlsRef.current = hls;
       hls.loadSource(streamUrl);
@@ -124,12 +181,13 @@ function Player() {
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              // Automatic self-healing: if HTTPS fails, try HTTP fallback!
+              // Automatic self-healing: if HTTPS fails, try HTTP proxy fallback!
               const currentHlsSource = hls.url;
-              if (currentHlsSource && currentHlsSource.startsWith("https://")) {
-                const fallbackUrl = currentHlsSource.replace("https://", "http://");
-                console.warn(`[Player] Network error on HTTPS stream. Retrying with HLS HTTP fallback: ${fallbackUrl}`);
-                toast.info("SSL Handshake failed. Attempting HTTP fallback...");
+              if (currentHlsSource && currentHlsSource.startsWith("https://") && !currentHlsSource.includes("corsproxy.io")) {
+                const insecureUrl = currentHlsSource.replace("https://", "http://");
+                const fallbackUrl = `https://corsproxy.io/?url=${encodeURIComponent(insecureUrl)}`;
+                console.warn(`[Player] Network error on HTTPS stream. Retrying with HLS HTTP proxy fallback: ${fallbackUrl}`);
+                toast.info("SSL Handshake failed. Attempting secure proxy...");
                 hls.loadSource(fallbackUrl);
                 hls.startLoad();
               } else {
