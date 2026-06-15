@@ -113,8 +113,15 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 
+import { useAppStore } from "../store/app-store";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const initializeFromStorage = useAppStore((s) => s.initializeFromStorage);
+
+  useEffect(() => {
+    initializeFromStorage();
+  }, [initializeFromStorage]);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, Bell, Play, Plus, Info, Star } from "lucide-react";
-import { channels, movies, featuredHero } from "@/lib/mock-data";
+import { channels as seedChannels, movies as seedMovies, featuredHero } from "@/lib/mock-data";
 import { LiveBadge, QualityBadge } from "@/components/badges";
 import { Logo } from "@/components/logo";
+import { useAppStore } from "@/store/app-store";
 
 export const Route = createFileRoute("/_app/home")({
   component: HomePage,
@@ -11,6 +12,16 @@ export const Route = createFileRoute("/_app/home")({
 
 function HomePage() {
   const [heroIdx, setHeroIdx] = useState(0);
+  const channelsFromStore = useAppStore((s) => s.channels);
+
+  // Split channels into Live and Movies
+  const liveChannels = channelsFromStore.filter((c) => c.isLive);
+  const moviesFromStore = channelsFromStore.filter((c) => !c.isLive && c.category === "Movies");
+
+  // Fallback to seeds if empty
+  const activeChannels = liveChannels.length > 0 ? liveChannels : seedChannels;
+  const activeMovies = moviesFromStore.length > 0 ? moviesFromStore : seedMovies;
+
   useEffect(() => {
     const t = setInterval(() => setHeroIdx((i) => (i + 1) % featuredHero.length), 6000);
     return () => clearInterval(t);
@@ -77,11 +88,11 @@ function HomePage() {
       {/* Rows */}
       <div className="space-y-7 px-4 py-6">
         <Row title="Continue Watching">
-          {movies.slice(0, 8).map((m) => (
+          {activeMovies.slice(0, 8).map((m: any) => (
             <Link key={m.id} to="/player/$id" params={{ id: m.id }} className="group shrink-0 w-40">
               <div className="relative aspect-video overflow-hidden rounded-xl border border-border">
                 <img src={m.backdrop} alt={m.title} className="h-full w-full object-cover transition group-hover:scale-105" />
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-foreground/20"><div className="h-full bg-primary" style={{ width: `${20 + (parseInt(m.id.slice(1)) * 7) % 70}%` }} /></div>
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-foreground/20"><div className="h-full bg-primary" style={{ width: `${20 + (parseInt(m.id.replace(/^\D+/g, '')) * 7 || 0) % 70}%` }} /></div>
               </div>
               <p className="mt-2 truncate text-sm font-medium">{m.title}</p>
             </Link>
@@ -89,7 +100,7 @@ function HomePage() {
         </Row>
 
         <Row title="Popular Channels">
-          {channels.slice(0, 12).map((c) => (
+          {activeChannels.slice(0, 12).map((c) => (
             <Link key={c.id} to="/player/$id" params={{ id: c.id }} className="group shrink-0 w-32">
               <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface transition hover:border-primary hover:shadow-glow">
                 <img src={c.logo} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
@@ -102,13 +113,13 @@ function HomePage() {
         </Row>
 
         <Row title="Recently Added">
-          {movies.slice(0, 10).map((m) => (
-            <Link key={m.id} to="/movies" className="group shrink-0 w-32">
+          {activeMovies.slice(0, 10).map((m: any) => (
+            <Link key={m.id} to={m.isLive === false ? "/player/$id" : "/movies"} params={m.isLive === false ? { id: m.id } : undefined} className="group shrink-0 w-32">
               <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border">
                 <img src={m.poster} alt={m.title} className="h-full w-full object-cover transition group-hover:scale-105" />
                 <div className="absolute top-2 right-2"><QualityBadge quality={m.quality} /></div>
                 <div className="absolute bottom-1 left-1 inline-flex items-center gap-1 rounded bg-background/70 backdrop-blur px-1.5 py-0.5 text-[10px] font-bold">
-                  <Star className="h-2.5 w-2.5 fill-primary text-primary" /> {m.rating}
+                  <Star className="h-2.5 w-2.5 fill-primary text-primary" /> {m.rating || "7.5"}
                 </div>
               </div>
               <p className="mt-2 truncate text-xs font-medium">{m.title}</p>

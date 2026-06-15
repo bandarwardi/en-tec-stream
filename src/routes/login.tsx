@@ -8,16 +8,57 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
+import { toast } from "sonner";
+import { fetchPlaylist } from "@/lib/api/m3u.functions";
+
 function Login() {
   const navigate = useNavigate();
   const login = useAppStore((s) => s.login);
+  const addPlaylist = useAppStore((s) => s.addPlaylist);
   const [tab, setTab] = useState<"login" | "playlist">("login");
   const [email, setEmail] = useState("");
   const [playlistUrl, setPlaylistUrl] = useState("");
+  const [playlistName, setPlaylistName] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (name: string) => {
     login(name);
     navigate({ to: "/home" });
+  };
+
+  const handleLoadPlaylist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!playlistUrl) return;
+
+    setLoading(true);
+    const promise = fetchPlaylist(playlistUrl);
+
+    toast.promise(promise, {
+      loading: "Fetching and parsing playlist...",
+      success: (res) => {
+        setLoading(false);
+        if (res.success) {
+          const finalName = playlistName.trim() || `Playlist ${new Date().toLocaleDateString()}`;
+          const playlistId = `p_${Date.now()}`;
+          addPlaylist({
+            id: playlistId,
+            name: finalName,
+            url: playlistUrl,
+            channels: res.channels.length,
+            updated: "Just now",
+          }, res.channels, null);
+          
+          handleLogin("Guest");
+          return `Loaded ${res.channels.length} channels successfully!`;
+        } else {
+          throw new Error(res.error || "Failed to load playlist");
+        }
+      },
+      error: (err) => {
+        setLoading(false);
+        return err.message || "Failed to parse M3U. Check connection or URL.";
+      }
+    });
   };
 
   return (
@@ -83,23 +124,27 @@ function Login() {
               </button>
             </form>
           ) : (
-            <form onSubmit={(e) => { e.preventDefault(); handleLogin("guest"); }} className="mt-6 space-y-4">
+            <form onSubmit={handleLoadPlaylist} className="mt-6 space-y-4">
               <div className="relative">
                 <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   value={playlistUrl}
                   onChange={(e) => setPlaylistUrl(e.target.value)}
                   required
+                  disabled={loading}
                   placeholder="https://example.com/playlist.m3u"
-                  className="w-full rounded-xl border border-border bg-input py-3 pl-10 pr-4 text-sm outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-input py-3 pl-10 pr-4 text-sm outline-none focus:border-primary disabled:opacity-50"
                 />
               </div>
               <input
+                value={playlistName}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                disabled={loading}
                 placeholder="Playlist name (optional)"
-                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-primary disabled:opacity-50"
               />
-              <button type="submit" className="w-full rounded-xl bg-gold-gradient py-3 text-sm font-bold text-black shadow-glow active:scale-95">
-                Load Playlist
+              <button type="submit" disabled={loading} className="w-full rounded-xl bg-gold-gradient py-3 text-sm font-bold text-black shadow-glow active:scale-95 disabled:opacity-50">
+                {loading ? "Loading..." : "Load Playlist"}
               </button>
             </form>
           )}

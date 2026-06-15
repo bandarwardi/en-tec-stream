@@ -3,14 +3,39 @@ import { ChevronLeft, Star, Play, Heart, Drama } from "lucide-react";
 import { toast } from "sonner";
 import { seriesList, type SeriesEpisode } from "@/lib/mock-data";
 import { DetailSkeleton } from "@/components/detail-skeleton";
+import { useAppStore } from "@/store/app-store";
 
 export const Route = createFileRoute("/_app/series/$id")({
   component: SeriesDetailPage,
   pendingComponent: DetailSkeleton,
   pendingMs: 0,
   loader: async ({ params }) => {
-    await new Promise((r) => setTimeout(r, 350));
-    const series = seriesList.find((s) => s.id === params.id);
+    let series = seriesList.find((s) => s.id === params.id);
+    if (!series) {
+      const channel = useAppStore.getState().channels.find((c) => c.id === params.id);
+      if (channel) {
+        series = {
+          id: channel.id,
+          title: channel.name,
+          poster: channel.logo,
+          backdrop: channel.logo,
+          rating: 8.0,
+          seasons: 1,
+          year: 2026,
+          genres: [channel.category],
+          description: `TV Series: ${channel.name} from category ${channel.category}.`,
+          episodes: [
+            {
+              id: `${channel.id}_e1`,
+              number: 1,
+              title: "Episode 1",
+              duration: "45m",
+              thumbnail: channel.logo
+            }
+          ]
+        };
+      }
+    }
     if (!series) throw notFound();
     return { series };
   },

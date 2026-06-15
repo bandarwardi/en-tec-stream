@@ -3,14 +3,32 @@ import { ChevronLeft, Star, Clock, Play, Heart, Drama } from "lucide-react";
 import { toast } from "sonner";
 import { movies } from "@/lib/mock-data";
 import { DetailSkeleton } from "@/components/detail-skeleton";
+import { useAppStore } from "@/store/app-store";
 
 export const Route = createFileRoute("/_app/movie/$id")({
   component: MovieDetailPage,
   pendingComponent: DetailSkeleton,
   pendingMs: 0,
   loader: async ({ params }) => {
-    await new Promise((r) => setTimeout(r, 350));
-    const movie = movies.find((m) => m.id === params.id);
+    let movie = movies.find((m) => m.id === params.id);
+    if (!movie) {
+      const channel = useAppStore.getState().channels.find((c) => c.id === params.id);
+      if (channel) {
+        movie = {
+          id: channel.id,
+          title: channel.name,
+          poster: channel.logo,
+          backdrop: channel.logo,
+          rating: 7.5,
+          year: 2026,
+          duration: "VOD",
+          quality: channel.quality,
+          genres: [channel.category],
+          description: `VOD Stream: ${channel.name} from category ${channel.category}.`,
+          cast: []
+        };
+      }
+    }
     if (!movie) throw notFound();
     return { movie };
   },

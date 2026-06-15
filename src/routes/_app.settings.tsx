@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, Globe, Bell, Languages, Shield, Star, Info, LogOut, ChevronRight, User, Volume2, Subtitles, Crown } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ChevronLeft, Bell, Shield, Star, Info, LogOut, ChevronRight, User, Volume2, Subtitles, Crown, List } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsPage,
@@ -8,11 +9,81 @@ export const Route = createFileRoute("/_app/settings")({
 
 function SettingsPage() {
   const user = useAppStore((s) => s.user);
-  const language = useAppStore((s) => s.language);
-  const setLanguage = useAppStore((s) => s.setLanguage);
+  const playlists = useAppStore((s) => s.playlists);
+  const forceHttp = useAppStore((s) => s.forceHttp);
+  const setForceHttp = useAppStore((s) => s.setForceHttp);
+  
+  const player = useAppStore((s) => s.player);
+  const setQuality = useAppStore((s) => s.setQuality);
+  
+  const navigate = useNavigate();
+
+  // Quality settings toggler
+  const toggleQuality = () => {
+    const qualities: ("Auto" | "4K" | "1080p" | "720p")[] = ["Auto", "4K", "1080p", "720p"];
+    const currentIdx = qualities.indexOf(player.quality as any);
+    const nextIdx = (currentIdx + 1) % qualities.length;
+    const nextVal = qualities[nextIdx];
+    console.log("[Settings] Toggling quality to:", nextVal);
+    setQuality(nextVal);
+  };
+
+  // Subtitles settings toggler
+  const [subtitles, setSubtitles] = useState(() => {
+    try {
+      return typeof window !== "undefined" ? localStorage.getItem("settings_subtitles") || "English" : "English";
+    } catch (e) {
+      return "English";
+    }
+  });
+  const toggleSubtitles = () => {
+    const options = ["English", "Arabic", "Off"];
+    const currentIdx = options.indexOf(subtitles);
+    const nextIdx = (currentIdx + 1) % options.length;
+    const nextVal = options[nextIdx];
+    console.log("[Settings] Toggling subtitles to:", nextVal);
+    setSubtitles(nextVal);
+    try {
+      localStorage.setItem("settings_subtitles", nextVal);
+    } catch (e) {}
+  };
+
+  // Notifications settings toggler
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      return typeof window !== "undefined" ? localStorage.getItem("settings_notifications") !== "false" : true;
+    } catch (e) {
+      return true;
+    }
+  });
+  const toggleNotifications = () => {
+    const nextVal = !notifications;
+    console.log("[Settings] Toggling notifications to:", nextVal);
+    setNotifications(nextVal);
+    try {
+      localStorage.setItem("settings_notifications", String(nextVal));
+    } catch (e) {}
+  };
+
+  // Parental Control settings toggler
+  const [parentalControl, setParentalControl] = useState(() => {
+    try {
+      return typeof window !== "undefined" ? localStorage.getItem("settings_parental") === "true" : false;
+    } catch (e) {
+      return false;
+    }
+  });
+  const toggleParental = () => {
+    const nextVal = !parentalControl;
+    console.log("[Settings] Toggling parental control to:", nextVal);
+    setParentalControl(nextVal);
+    try {
+      localStorage.setItem("settings_parental", String(nextVal));
+    } catch (e) {}
+  };
 
   return (
-    <div className="px-4 pt-5">
+    <div className="px-4 pt-5 pb-20">
       <header className="mb-5 flex items-center gap-3">
         <Link to="/home" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
         <h1 className="text-2xl font-black">Settings</h1>
@@ -31,22 +102,22 @@ function SettingsPage() {
       </div>
 
       <Section title="Player">
-        <Row icon={<Volume2 />} label="Default Quality" value="Auto · 4K" />
-        <Row icon={<Languages />} label="Audio Language" value="Arabic, English" />
-        <Row icon={<Subtitles />} label="Subtitles" value="On — English" />
+        <Row icon={<Volume2 />} label="Default Quality" value={player.quality} onClick={toggleQuality} />
+        <Row icon={<Subtitles />} label="Subtitles" value={subtitles === "Off" ? "Off" : `On — ${subtitles}`} onClick={toggleSubtitles} />
+        <Row icon={<Shield />} label="Force HTTP (Bypass SSL)" value={forceHttp ? "Enabled" : "Disabled"} onClick={() => {
+          console.log("[Settings] Toggling forceHttp to:", !forceHttp);
+          setForceHttp(!forceHttp);
+        }} />
       </Section>
 
       <Section title="App">
-        <Row icon={<Globe />} label="Language" value={language === "ar" ? "العربية" : "English"} onClick={() => setLanguage(language === "ar" ? "en" : "ar")} />
-        <Row icon={<Bell />} label="Notifications" value="Enabled" />
-        <Row icon={<Shield />} label="Parental Control" value="Off" />
+        <Row icon={<List />} label="Playlists" value={`${playlists.length} Loaded`} onClick={() => navigate({ to: "/playlists" })} />
+        <Row icon={<Bell />} label="Notifications" value={notifications ? "Enabled" : "Disabled"} onClick={toggleNotifications} />
+        <Row icon={<Shield />} label="Parental Control" value={parentalControl ? "On" : "Off"} onClick={toggleParental} />
       </Section>
 
       <Section title="Subscription">
-        <Row icon={<Star />} label="Current Plan" value="Premium 4K" />
-        <button className="mt-2 w-full rounded-xl bg-gold-gradient py-3 text-sm font-black text-black shadow-glow active:scale-95">
-          Upgrade to 8K Ultra
-        </button>
+        <Row icon={<Star />} label="Current Plan" value={user?.plan ?? "Premium 4K"} />
       </Section>
 
       <Section title="About">
@@ -54,7 +125,7 @@ function SettingsPage() {
         <Row icon={<User />} label="Device Key" value="309324" />
       </Section>
 
-      <button className="mt-6 mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 py-3 text-sm font-bold text-destructive">
+      <button type="button" className="mt-6 mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 py-3 text-sm font-bold text-destructive cursor-pointer">
         <LogOut className="h-4 w-4" /> Sign Out
       </button>
     </div>
@@ -72,7 +143,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ icon, label, value, onClick }: { icon: React.ReactNode; label: string; value: string; onClick?: () => void }) {
   return (
-    <button onClick={onClick} className="flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left last:border-0 hover:bg-surface-2">
+    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left last:border-0 hover:bg-surface-2 cursor-pointer">
       <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-2 text-primary">
         <span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span>
       </span>

@@ -7,6 +7,7 @@ export type Channel = {
   next: string;
   quality: "4K" | "FHD" | "HD";
   isLive: boolean;
+  streamUrl?: string;
 };
 
 export type Movie = {
