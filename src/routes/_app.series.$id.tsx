@@ -71,32 +71,52 @@ function SeriesDetailPage() {
         </div>
       </div>
 
-      {/* Seasons */}
-      <section className="mt-10 px-5 pb-10">
-        <div className="mb-4 inline-block border-b-2 border-primary pb-1 text-sm font-bold">Season 1</div>
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-5 px-5">
-          {series.episodes.map((ep: SeriesEpisode, i: number) => (
-            <Link
-              key={ep.id}
-              to="/player/$id"
-              params={{ id: series.id }}
-              className={`group shrink-0 w-56 ${i === 0 ? "ring-2 ring-foreground rounded-xl" : ""}`}
-            >
-              <div className="relative aspect-video overflow-hidden rounded-xl border border-border">
-                <img src={ep.thumbnail} alt={ep.title} className="h-full w-full object-cover transition group-hover:scale-105" />
-                {i === 0 && (
-                  <div className="absolute inset-0 grid place-items-center bg-background/30">
-                    <Play className="h-10 w-10 fill-foreground text-foreground" />
-                  </div>
-                )}
-                <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between text-[11px] font-bold">
-                  <span className="rounded bg-background/80 px-1.5 py-0.5">S1 .E{ep.number}</span>
-                  <span className="rounded bg-background/80 px-1.5 py-0.5">{ep.duration}</span>
+      {/* Episodes */}
+      <section className="mt-10 space-y-8 px-5 pb-10">
+        {/* Current episode */}
+        <div>
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse-live" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Current Episode</h3>
+          </div>
+          {series.episodes.slice(0, 1).map((ep) => (
+            <Link key={ep.id} to="/player/$id" params={{ id: series.id }} className="flex gap-4 rounded-2xl border border-primary/40 bg-primary/5 p-3 transition hover:bg-primary/10">
+              <div className="relative aspect-video w-44 shrink-0 overflow-hidden rounded-xl">
+                <img src={ep.thumbnail} alt={ep.title} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 grid place-items-center bg-background/30">
+                  <Play className="h-9 w-9 fill-foreground text-foreground" />
                 </div>
               </div>
-              <p className="mt-2 truncate text-xs font-medium">{series.title} — {ep.title}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Season {series.seasons >= 1 ? 1 : series.seasons} · Episode {ep.number}</p>
+                <h4 className="mt-1 truncate text-base font-bold">{ep.title}</h4>
+                <p className="mt-1 text-xs text-muted-foreground">{ep.duration}</p>
+                <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{series.description}</p>
+              </div>
             </Link>
           ))}
+        </div>
+
+        {/* Upcoming */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Upcoming Episodes</h3>
+            <span className="text-xs text-muted-foreground">Season 1 · {series.episodes.length} episodes</span>
+          </div>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-5 px-5">
+            {series.episodes.slice(1).map((ep: SeriesEpisode) => (
+              <Link key={ep.id} to="/player/$id" params={{ id: series.id }} className="group shrink-0 w-56">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-border">
+                  <img src={ep.thumbnail} alt={ep.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                  <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between text-[11px] font-bold">
+                    <span className="rounded bg-background/80 px-1.5 py-0.5">S1·E{ep.number}</span>
+                    <span className="rounded bg-background/80 px-1.5 py-0.5">{ep.duration}</span>
+                  </div>
+                </div>
+                <p className="mt-2 truncate text-xs font-medium">{ep.title}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </div>
