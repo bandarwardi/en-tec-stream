@@ -191,13 +191,8 @@ function Player() {
                 hls.loadSource(fallbackUrl);
                 hls.startLoad();
               } else {
-                toast.error("Network error playing stream. Retrying...");
-                hls.startLoad();
-                setTimeout(() => {
-                  if (video.networkState === video.NETWORK_NO_SOURCE) {
-                    setPlaybackError(true);
-                  }
-                }, 2000);
+                console.error(`[Player] Fatal Network Error on stream: ${currentHlsSource}`);
+                setPlaybackError(true);
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
