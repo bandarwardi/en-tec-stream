@@ -91,8 +91,8 @@ function HomePage() {
         <Row title="Popular Channels">
           {channels.slice(0, 12).map((c) => (
             <Link key={c.id} to="/player/$id" params={{ id: c.id }} className="group shrink-0 w-32">
-              <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl border border-border bg-surface text-4xl transition hover:border-primary hover:shadow-glow">
-                {c.logo}
+              <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface transition hover:border-primary hover:shadow-glow">
+                <img src={c.logo} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
                 <div className="absolute top-2 left-2"><LiveBadge /></div>
               </div>
               <p className="mt-2 truncate text-xs font-semibold">{c.name}</p>
