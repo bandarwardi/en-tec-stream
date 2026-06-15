@@ -1,16 +1,24 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft, Star, Play, Heart, Drama } from "lucide-react";
+import { toast } from "sonner";
 import { seriesList, type SeriesEpisode } from "@/lib/mock-data";
+import { DetailSkeleton } from "@/components/detail-skeleton";
 
 export const Route = createFileRoute("/_app/series/$id")({
   component: SeriesDetailPage,
-  loader: ({ params }) => {
+  pendingComponent: DetailSkeleton,
+  pendingMs: 0,
+  loader: async ({ params }) => {
+    await new Promise((r) => setTimeout(r, 350));
     const series = seriesList.find((s) => s.id === params.id);
     if (!series) throw notFound();
     return { series };
   },
   notFoundComponent: () => <div className="p-10 text-center">Series not found</div>,
-  errorComponent: ({ error }) => <div className="p-10 text-center text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => {
+    if (typeof window !== "undefined") toast.error("Failed to load series", { description: error.message });
+    return <div className="p-10 text-center text-destructive">{error.message}</div>;
+  },
 });
 
 function SeriesDetailPage() {
