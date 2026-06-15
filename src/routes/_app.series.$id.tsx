@@ -106,6 +106,7 @@ function SeriesDetailPage() {
           <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-5 px-5">
             {series.episodes.slice(1).map((ep: SeriesEpisode) => (
               <Link key={ep.id} to="/player/$id" params={{ id: series.id }} className="group shrink-0 w-56">
+
                 <div className="relative aspect-video overflow-hidden rounded-xl border border-border">
                   <img src={ep.thumbnail} alt={ep.title} className="h-full w-full object-cover transition group-hover:scale-105" />
                   <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between text-[11px] font-bold">
