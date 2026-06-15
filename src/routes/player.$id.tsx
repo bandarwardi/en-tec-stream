@@ -167,7 +167,7 @@ function Player() {
                   onClick={() => { navigate({ to: "/player/$id", params: { id: c.id } }); setShowSide(false); }}
                   className={`flex w-full items-center gap-3 rounded-xl border p-2.5 text-left transition ${c.id === id ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-primary/50"}`}
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-2 text-lg">{c.logo}</div>
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-surface-2"><img src={c.logo} alt={c.name} className="h-full w-full object-cover" /></div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{c.name}</p>
                     <p className="truncate text-[10px] text-muted-foreground">{c.current}</p>
