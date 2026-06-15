@@ -62,7 +62,9 @@ function LivePage() {
             className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-4 transition hover:border-primary hover:shadow-glow"
           >
             <div className="flex items-start justify-between">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-surface-2 text-2xl">{ch.logo}</div>
+              <div className="h-12 w-12 overflow-hidden rounded-xl bg-surface-2 ring-1 ring-border">
+                <img src={ch.logo} alt={ch.name} loading="lazy" className="h-full w-full object-cover" />
+              </div>
               <LiveBadge />
             </div>
             <h3 className="mt-3 truncate text-sm font-bold">{ch.name}</h3>
