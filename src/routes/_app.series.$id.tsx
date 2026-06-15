@@ -79,7 +79,7 @@ function SeriesDetailPage() {
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse-live" />
             <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Current Episode</h3>
           </div>
-          {series.episodes.slice(0, 1).map((ep) => (
+          {series.episodes.slice(0, 1).map((ep: SeriesEpisode) => (
             <Link key={ep.id} to="/player/$id" params={{ id: series.id }} className="flex gap-4 rounded-2xl border border-primary/40 bg-primary/5 p-3 transition hover:bg-primary/10">
               <div className="relative aspect-video w-44 shrink-0 overflow-hidden rounded-xl">
                 <img src={ep.thumbnail} alt={ep.title} className="h-full w-full object-cover" />
