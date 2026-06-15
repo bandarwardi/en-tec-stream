@@ -1,16 +1,24 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft, Star, Clock, Play, Heart, Drama } from "lucide-react";
+import { toast } from "sonner";
 import { movies } from "@/lib/mock-data";
+import { DetailSkeleton } from "@/components/detail-skeleton";
 
 export const Route = createFileRoute("/_app/movie/$id")({
   component: MovieDetailPage,
-  loader: ({ params }) => {
+  pendingComponent: DetailSkeleton,
+  pendingMs: 0,
+  loader: async ({ params }) => {
+    await new Promise((r) => setTimeout(r, 350));
     const movie = movies.find((m) => m.id === params.id);
     if (!movie) throw notFound();
     return { movie };
   },
   notFoundComponent: () => <div className="p-10 text-center">Movie not found</div>,
-  errorComponent: ({ error }) => <div className="p-10 text-center text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => {
+    if (typeof window !== "undefined") toast.error("Failed to load movie", { description: error.message });
+    return <div className="p-10 text-center text-destructive">{error.message}</div>;
+  },
 });
 
 function MovieDetailPage() {
