@@ -47,6 +47,8 @@ type State = {
   loadChannelsForCategory: (playlistId: string, type: "live" | "vod" | "series", categoryId: string, categoryName: string) => Promise<void>;
   forceHttp: boolean;
   setForceHttp: (val: boolean) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
 };
 
 // Safe localStorage access
@@ -172,6 +174,9 @@ export const useAppStore = create<State>((set, get) => ({
   setQuality: (q) => set((s) => ({ player: { ...s.player, quality: q } })),
   
   togglePlay: () => set((s) => ({ player: { ...s.player, isPlaying: !s.player.isPlaying } })),
+  
+  sidebarOpen: false,
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
   
   forceHttp: isClient ? safeLocalStorage.getItem("streaming_force_http") === "true" : false,
   setForceHttp: (val) => {

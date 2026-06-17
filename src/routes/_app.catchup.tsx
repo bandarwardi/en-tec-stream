@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, Clock } from "lucide-react";
+import { ChevronLeft, Clock, Menu } from "lucide-react";
 import { channels } from "@/lib/mock-data";
+import { useAppStore } from "@/store/app-store";
 
 export const Route = createFileRoute("/_app/catchup")({
   component: CatchUpPage,
@@ -26,11 +27,20 @@ const programs = [
 ];
 
 function CatchUpPage() {
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   return (
     <div className="px-4 pt-5">
-      <header className="mb-5 flex items-center gap-3">
-        <Link to="/home" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
-        <h1 className="text-2xl font-black">Catch-Up</h1>
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link to="/home" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
+          <h1 className="text-2xl font-black">Catch-Up</h1>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
       <div className="mb-5 flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">

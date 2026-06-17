@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, Plus, Trash2, RefreshCw, CheckCircle2, Upload, Link as LinkIcon, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, RefreshCw, CheckCircle2, Upload, Link as LinkIcon, ShieldAlert, Menu } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/store/app-store";
 import { fetchPlaylist, fetchXtreamCategories, parseM3U, M3UChannel } from "@/lib/api/m3u.functions";
@@ -20,6 +20,9 @@ function getXtreamDisplayUrl(url: string): string {
 }
 
 function PlaylistsPage() {
+  const playlists = useAppStore((s) => s.playlists);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [importType, setImportType] = useState<"url" | "file" | "xtream">("url");
   const [name, setName] = useState("");
@@ -33,7 +36,6 @@ function PlaylistsPage() {
   
   const [loading, setLoading] = useState(false);
 
-  const playlists = useAppStore((s) => s.playlists);
   const active = useAppStore((s) => s.activePlaylistId);
   const setActive = useAppStore((s) => s.setActivePlaylist);
   const addPlaylist = useAppStore((s) => s.addPlaylist);
@@ -209,12 +211,22 @@ function PlaylistsPage() {
 
   return (
     <div className="px-4 pt-5">
-      <header className="mb-5 flex items-center gap-3">
-        <Link to="/settings" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
-        <h1 className="flex-1 text-2xl font-black">Playlists</h1>
-        <button onClick={() => { setModalOpen(true); setImportType("url"); }} className="inline-flex items-center gap-1.5 rounded-xl bg-gold-gradient px-3 py-2 text-xs font-bold text-black shadow-glow">
-          <Plus className="h-4 w-4" /> Add
-        </button>
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link to="/settings" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
+          <h1 className="text-2xl font-black">Playlists</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => { setModalOpen(true); setImportType("url"); }} className="inline-flex items-center gap-1.5 rounded-xl bg-gold-gradient px-3 py-2 text-xs font-bold text-black shadow-glow">
+            <Plus className="h-4 w-4" /> Add
+          </button>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden text-foreground"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       <div className="space-y-3">

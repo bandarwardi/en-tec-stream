@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, Bell, Shield, Star, Info, LogOut, ChevronRight, User, Volume2, Subtitles, Crown, List } from "lucide-react";
+import { ChevronLeft, Bell, Shield, Star, Info, LogOut, ChevronRight, User, Volume2, Subtitles, Crown, List, Menu } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { useState } from "react";
 
@@ -15,6 +15,7 @@ function SettingsPage() {
   
   const player = useAppStore((s) => s.player);
   const setQuality = useAppStore((s) => s.setQuality);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   
   const navigate = useNavigate();
 
@@ -84,9 +85,17 @@ function SettingsPage() {
 
   return (
     <div className="px-4 pt-5 pb-20">
-      <header className="mb-5 flex items-center gap-3">
-        <Link to="/home" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
-        <h1 className="text-2xl font-black">Settings</h1>
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link to="/home" className="grid h-9 w-9 place-items-center rounded-full bg-surface"><ChevronLeft className="h-5 w-5" /></Link>
+          <h1 className="text-2xl font-black">Settings</h1>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
       {/* Account */}

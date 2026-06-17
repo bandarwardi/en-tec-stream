@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Star, Search, Tv } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { ChevronLeft, Star, Search, Tv, Menu } from "lucide-react";
 import { seriesList as seedSeriesList } from "@/lib/mock-data";
 import { useAppStore } from "@/store/app-store";
 import { Skeleton } from "@/components/skeleton";
@@ -15,11 +15,16 @@ function SeriesPage() {
   const channels = useAppStore((s) => s.channels);
   const loadingChannels = useAppStore((s) => s.loadingChannels);
   const loadChannelsForCategory = useAppStore((s) => s.loadChannelsForCategory);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   const [selectedCatId, setSelectedCatId] = useState<string>("");
   const [selectedCatName, setSelectedCatName] = useState<string>("");
   const [catSearch, setCatSearch] = useState("");
   const [seriesSearch, setSeriesSearch] = useState("");
+
+  // Infinite Scroll State
+  const [visibleCount, setVisibleCount] = useState(60);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const categories = useMemo(() => {
     return activeCategories?.series || [];
@@ -68,6 +73,31 @@ function SeriesPage() {
     }
   }, [isDemo, hasSeriesCategories, channels, seedSeriesList, seriesSearch]);
 
+  const slicedSeries = useMemo(() => {
+    return seriesToShow.slice(0, visibleCount);
+  }, [seriesToShow, visibleCount]);
+
+  // Reset visible count on category or search change
+  useEffect(() => {
+    setVisibleCount(60);
+  }, [selectedCatId, seriesSearch]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 60);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [seriesToShow.length, visibleCount]);
+
   return (
     <div className="px-4 pt-5 pb-20">
       <header className="mb-5 flex items-center justify-between gap-3">
@@ -82,6 +112,12 @@ function SeriesPage() {
             )}
           </div>
         </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
       {/* Search Input */}
@@ -98,7 +134,7 @@ function SeriesPage() {
       {isDemo || !hasSeriesCategories ? (
         /* Demo View - Simple Grid */
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {seriesToShow.map((s: any) => (
+          {slicedSeries.map((s: any) => (
             <Link key={s.id} to="/series/$id" params={{ id: s.id }} className="group">
               <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border">
                 <img src={s.poster} alt={s.title} className="h-full w-full object-cover transition group-hover:scale-105" />
@@ -110,6 +146,14 @@ function SeriesPage() {
               <p className="text-[11px] text-muted-foreground">{s.seasons} season{s.seasons > 1 ? "s" : ""}</p>
             </Link>
           ))}
+          {seriesToShow.length > visibleCount && (
+            <div
+              ref={sentinelRef}
+              className="col-span-full py-6 flex items-center justify-center text-xs text-muted-foreground"
+            >
+              Loading more...
+            </div>
+          )}
         </div>
       ) : (
         /* Real Playlist View - Category Sidebar & On-Demand Grid */
@@ -176,7 +220,7 @@ function SeriesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {seriesToShow.map((s: any) => (
+                {slicedSeries.map((s: any) => (
                   <Link key={s.id} to="/series/$id" params={{ id: s.id }} className="group">
                     <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border bg-surface">
                       <img
@@ -196,6 +240,14 @@ function SeriesPage() {
                     <p className="text-[11px] text-muted-foreground">TV Series</p>
                   </Link>
                 ))}
+                {seriesToShow.length > visibleCount && (
+                  <div
+                    ref={sentinelRef}
+                    className="col-span-full py-6 flex items-center justify-center text-xs text-muted-foreground"
+                  >
+                    Loading more...
+                  </div>
+                )}
               </div>
             )}
           </div>

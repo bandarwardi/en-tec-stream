@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, Bell, Play, Plus, Info, Star } from "lucide-react";
+import { Search, Bell, Play, Plus, Info, Star, Menu } from "lucide-react";
 import { channels as seedChannels, movies as seedMovies, featuredHero } from "@/lib/mock-data";
 import { LiveBadge, QualityBadge } from "@/components/badges";
 import { Logo } from "@/components/logo";
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_app/home")({
 function HomePage() {
   const [heroIdx, setHeroIdx] = useState(0);
   const channelsFromStore = useAppStore((s) => s.channels);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   // Split channels into Live and Movies
   const liveChannels = channelsFromStore.filter((c) => c.isLive);
@@ -32,7 +33,15 @@ function HomePage() {
     <div>
       {/* Header */}
       <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 pt-5">
-        <Logo size={32} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-background/40 backdrop-blur-md text-foreground lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <Logo size={32} />
+        </div>
         <div className="flex items-center gap-2">
           <button className="grid h-10 w-10 place-items-center rounded-full bg-background/40 backdrop-blur-md text-foreground"><Search className="h-5 w-5" /></button>
           <button className="grid h-10 w-10 place-items-center rounded-full bg-background/40 backdrop-blur-md text-foreground"><Bell className="h-5 w-5" /></button>

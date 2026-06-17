@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Search, ChevronLeft, Tv } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Search, ChevronLeft, Tv, Menu } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { LiveBadge, QualityBadge } from "@/components/badges";
 import { Skeleton } from "@/components/skeleton";
@@ -15,11 +15,16 @@ function LivePage() {
   const channels = useAppStore((s) => s.channels);
   const loadingChannels = useAppStore((s) => s.loadingChannels);
   const loadChannelsForCategory = useAppStore((s) => s.loadChannelsForCategory);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   const [selectedCatId, setSelectedCatId] = useState<string>("");
   const [selectedCatName, setSelectedCatName] = useState<string>("");
   const [catSearch, setCatSearch] = useState("");
   const [channelSearch, setChannelSearch] = useState("");
+
+  // Infinite Scroll State
+  const [visibleCount, setVisibleCount] = useState(60);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const categories = useMemo(() => {
     return activeCategories?.live || [];
@@ -58,6 +63,31 @@ function LivePage() {
     );
   }, [channels, channelSearch]);
 
+  const slicedChannels = useMemo(() => {
+    return filteredChannels.slice(0, visibleCount);
+  }, [filteredChannels, visibleCount]);
+
+  // Reset visible count on category or search change
+  useEffect(() => {
+    setVisibleCount(60);
+  }, [selectedCatId, channelSearch]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 60);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredChannels.length, visibleCount]);
+
   return (
     <div className="px-4 pt-5 pb-20">
       <header className="mb-5 flex items-center justify-between gap-3">
@@ -72,6 +102,12 @@ function LivePage() {
             )}
           </div>
         </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
       {categories.length === 0 ? (
@@ -166,7 +202,7 @@ function LivePage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {filteredChannels.map((ch) => (
+                {slicedChannels.map((ch) => (
                   <Link
                     key={ch.id}
                     to="/player/$id"
@@ -195,6 +231,14 @@ function LivePage() {
                     </div>
                   </Link>
                 ))}
+                {filteredChannels.length > visibleCount && (
+                  <div
+                    ref={sentinelRef}
+                    className="col-span-full py-6 flex items-center justify-center text-xs text-muted-foreground"
+                  >
+                    Loading more...
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Search, Star, ChevronLeft, Film } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Search, Star, ChevronLeft, Film, Menu } from "lucide-react";
 import { movies as seedMovies } from "@/lib/mock-data";
 import { QualityBadge } from "@/components/badges";
 import { useAppStore } from "@/store/app-store";
@@ -18,11 +18,16 @@ function MoviesPage() {
   const channels = useAppStore((s) => s.channels);
   const loadingChannels = useAppStore((s) => s.loadingChannels);
   const loadChannelsForCategory = useAppStore((s) => s.loadChannelsForCategory);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   const [selectedCatId, setSelectedCatId] = useState<string>("");
   const [selectedCatName, setSelectedCatName] = useState<string>("");
   const [catSearch, setCatSearch] = useState("");
   const [movieSearch, setMovieSearch] = useState("");
+
+  // Infinite Scroll State
+  const [visibleCount, setVisibleCount] = useState(60);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [genreFilter, setGenreFilter] = useState("All");
 
   const categories = useMemo(() => {
@@ -73,6 +78,31 @@ function MoviesPage() {
     }
   }, [isDemo, hasVodCategories, channels, seedMovies, genreFilter, movieSearch]);
 
+  const slicedMovies = useMemo(() => {
+    return moviesToShow.slice(0, visibleCount);
+  }, [moviesToShow, visibleCount]);
+
+  // Reset visible count on category or search or filter change
+  useEffect(() => {
+    setVisibleCount(60);
+  }, [selectedCatId, movieSearch, genreFilter]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 60);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [moviesToShow.length, visibleCount]);
+
   return (
     <div className="px-4 pt-5 pb-20">
       <header className="mb-5 flex items-center justify-between gap-3">
@@ -87,6 +117,12 @@ function MoviesPage() {
             )}
           </div>
         </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="grid h-9 w-9 place-items-center rounded-full bg-surface lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
       {/* Search Input */}
@@ -118,7 +154,7 @@ function MoviesPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {moviesToShow.map((m: any) => (
+            {slicedMovies.map((m: any) => (
               <Link key={m.id} to="/movie/$id" params={{ id: m.id }} className="group">
                 <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border">
                   <img src={m.poster} alt={m.title} className="h-full w-full object-cover transition group-hover:scale-105" />
@@ -132,6 +168,14 @@ function MoviesPage() {
                 <p className="text-[11px] text-muted-foreground">{m.year || 2026} {m.duration ? `· ${m.duration}` : ""}</p>
               </Link>
             ))}
+            {moviesToShow.length > visibleCount && (
+              <div
+                ref={sentinelRef}
+                className="col-span-full py-6 flex items-center justify-center text-xs text-muted-foreground"
+              >
+                Loading more...
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -199,7 +243,7 @@ function MoviesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {moviesToShow.map((m: any) => (
+                {slicedMovies.map((m: any) => (
                   <Link key={m.id} to="/movie/$id" params={{ id: m.id }} className="group">
                     <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border bg-surface">
                       <img
@@ -221,6 +265,14 @@ function MoviesPage() {
                     <p className="text-[11px] text-muted-foreground">VOD Movie</p>
                   </Link>
                 ))}
+                {moviesToShow.length > visibleCount && (
+                  <div
+                    ref={sentinelRef}
+                    className="col-span-full py-6 flex items-center justify-center text-xs text-muted-foreground"
+                  >
+                    Loading more...
+                  </div>
+                )}
               </div>
             )}
           </div>
